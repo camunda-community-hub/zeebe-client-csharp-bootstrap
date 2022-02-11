@@ -27,14 +27,16 @@ namespace Zeebe.Client.Bootstrap.Extensions
             if(options.TransportEncryption == null)
                 return builder.UsePlainText();
 
-            if(!String.IsNullOrEmpty(options.TransportEncryption.RootCertificatePath))
-                return builder.UseTransportEncryption(options.TransportEncryption.RootCertificatePath);
+            IZeebeSecureClientBuilder clientBuilder = null;
+            if (!String.IsNullOrEmpty(options.TransportEncryption.RootCertificatePath))
+                clientBuilder = builder.UseTransportEncryption(options.TransportEncryption.RootCertificatePath);
+            else
+                clientBuilder = builder.UseTransportEncryption();
 
             if(!string.IsNullOrEmpty(options.TransportEncryption.AccessToken))
-                return builder.UseTransportEncryption().UseAccessToken(options.TransportEncryption.AccessToken);
-
-            if(options.TransportEncryption.AccessTokenSupplier != null)
-                return builder.UseTransportEncryption().UseAccessTokenSupplier(options.TransportEncryption.AccessTokenSupplier);
+                return clientBuilder.UseAccessToken(options.TransportEncryption.AccessToken);
+            else if(options.TransportEncryption.AccessTokenSupplier != null)
+                return clientBuilder.UseAccessTokenSupplier(options.TransportEncryption.AccessTokenSupplier);
 
             throw new NotImplementedException($"{nameof(options.TransportEncryption)} is instantiated but none of it's properties have valid values.");
         }
